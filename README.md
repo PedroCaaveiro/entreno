@@ -37,6 +37,22 @@ aviso rojo, los registros no se guardarán y necesitas la opción A.
 Sube el `index.html` nuevo y cambia en `sw.js` la línea `const CACHE = "entreno-v1"` a
 `"entreno-v2"`. Sin ese cambio el móvil seguirá usando la copia guardada de la versión vieja.
 
+## Versión 2 (septiembre 2026)
+
+- Plan nuevo: lunes Fuerza A, martes cardio y core, miércoles Fuerza B, viernes y sábado
+  fitboxing, jueves y domingo descanso.
+- Activación antes de cada sesión de gimnasio (con dibujos). Los estiramientos están ocultos
+  por ahora: para recuperarlos, en `index.html` cambia `SHOW_EST = false` a `true`.
+- Remo: registra minutos, metros, paladas por minuto y pulsaciones. La cinta registra también pulsaciones.
+- Al abrir la app, el plan antiguo se sustituye por el nuevo. Los registros y los ejercicios
+  que añadiste tú se conservan, y queda una copia del plan viejo en el navegador.
+
+## Alimentación (versión 5)
+
+Pestaña **Comida**: menú de lunes a domingo (unas 2.000 kcal y 160 g de proteína al día),
+con claves y lista de la compra. En el día de hoy, toca cada comida al terminarla para ver
+lo que llevas. Solo se guardan los últimos 14 días.
+
 ## Copias de seguridad
 
 Los registros se guardan solo en el navegador de tu móvil. Usa **Ajustes → Exportar copia**
@@ -46,3 +62,10 @@ de vez en cuando, y guarda el fichero .json donde quieras.
 
     npm install jsdom
     APP=index.html node test.js
+
+## Créditos de las ilustraciones
+
+Ilustraciones de ejercicios: [Workout Guide](https://github.com/bryllim/workout-guide) de
+Bryl Lim, basadas en el trabajo de [Everkinetic](https://github.com/everkinetic/data),
+con licencia [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+Cambios: color adaptado al tema de la app.
