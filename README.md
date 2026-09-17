@@ -41,8 +41,8 @@ Sube el `index.html` nuevo y cambia en `sw.js` la línea `const CACHE = "entreno
 
 - Plan nuevo: lunes Fuerza A, martes cardio y core, miércoles Fuerza B, viernes y sábado
   fitboxing, jueves y domingo descanso.
-- Activación antes de cada sesión de gimnasio (con dibujos). Los estiramientos están ocultos
-  por ahora: para recuperarlos, en `index.html` cambia `SHOW_EST = false` a `true`.
+- Activación y estiramientos: ocultos por ahora. Para recuperarlos, en `index.html` cambia
+  `SHOW_ACT` o `SHOW_EST` de `false` a `true`.
 - Remo: registra minutos, metros, paladas por minuto y pulsaciones. La cinta registra también pulsaciones.
 - Al abrir la app, el plan antiguo se sustituye por el nuevo. Los registros y los ejercicios
   que añadiste tú se conservan, y queda una copia del plan viejo en el navegador.

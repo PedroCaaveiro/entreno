@@ -20,12 +20,13 @@ function boot(stored, date) {
 // 1. plan nuevo
 let w = boot(null, "2026-09-21T10:00:00");            // lunes
 let A = w.APP;
-ok(A.state.v === 2, "plan v2 por defecto");
+ok(A.state.v === 3, "plan v3 por defecto");
+ok(A.findEx("e20") && !A.findEx("e3") && A.findEx("e21"), "patada de glúteo y aducción en el plan");
 ok(A.state.days.map(d => d.wd.join()).join("|") === "1|2|3|5,6", "días: lun, mar, mié, vie+sáb");
 ok(!A.dayForDate(new w.Date("2026-09-24T10:00:00")), "jueves sin sesión");
 ok(!A.dayForDate(new w.Date("2026-09-27T10:00:00")), "domingo sin sesión");
 let hoy = w.document.getElementById("v-hoy").textContent;
-ok(hoy.includes("Antes: activación") && !hoy.includes("estiramientos"), "lunes muestra activación y no estiramientos");
+ok(!hoy.includes("activación") && !hoy.includes("estiramientos") && !hoy.includes("Sesión"), "lunes sin activación ni estiramientos");
 ok(w.document.getElementById("hdrDay").textContent === "Fuerza A", "lunes = Fuerza A");
 let missing = [];
 A.state.days.forEach(d => d.ex.forEach(e => { if (e.ref && !A.REF[e.ref]) missing.push(e.ref); }));
@@ -44,8 +45,7 @@ ok(A.setsText(c) === "30 min · 7% · 5 km/h · 118 ppm", "texto de cinta: " + A
 w.document.querySelector('[data-ex="e1"]').click();
 ok(w.document.querySelectorAll("#sheetBox input[data-k=kg]").length === 4, "prensa abre con 4 series");
 w.document.querySelector('[data-act="close"]').click();
-w.document.querySelector('[data-mov="m1"]').click();
-ok(w.document.getElementById("sheetBox").textContent.includes("talones"), "hoja de puente de glúteo");
+ok(!w.document.querySelector("[data-mov]"), "sin tarjetas de activación");
 
 // 4. editor: crear cardio de remo
 let e = A.addExercise("d4", { name: "Remo extra", t: "c:remo", sets: 1, reps: "10 min" });
@@ -78,7 +78,7 @@ const viejo = { v: 1, days: [
          { id: "l2", exId: "e7", date: "2026-09-03", cardio: { min: 35, inc: 12, kmh: 5.5 } }] };
 w = boot(viejo, "2026-09-24T10:00:00");               // jueves
 A = w.APP;
-ok(A.state.v === 2 && A.state.days.length === 4, "plan viejo actualizado");
+ok(A.state.v === 3 && A.state.days.length === 4, "plan viejo actualizado");
 ok(A.state.logs.length === 2, "registros conservados");
 ok(A.state.eaten && typeof A.state.eaten === "object", "estado viejo recibe registro de comidas");
 ok(A.logsOf("e1")[0].sets[0].kg === 80, "historial de prensa intacto");
@@ -87,11 +87,25 @@ ok(A.findEx("ek3x9z1ab") && A.findEx("ek3x9z1ab").day.id === "d1", "ejercicio pr
 ok(w.localStorage.getItem("entreno.v1.copia-v1") !== null, "copia del plan viejo guardada");
 ok(w.document.getElementById("hdrDay").textContent === "Descanso", "jueves = descanso");
 ok(!w.document.getElementById("v-hoy").textContent.includes("Figura 4"), "descanso sin estiramientos");
-A.setView("plan"); ok(!w.document.getElementById("v-plan").textContent.includes("Estiramientos"), "plan sin estiramientos");
+A.setView("plan"); const pl = w.document.getElementById("v-plan").textContent;
+ok(!pl.includes("Estiramientos") && !pl.includes("Activación"), "plan sin estiramientos ni activación");
 ["plan", "food", "hist", "set"].forEach(v => { A.setView(v); ok(w.document.getElementById("v-" + v).innerHTML.length > 50, "vista " + v); });
 
+// 5b. usuario con plan v2 (hip thrust registrado)
+const v2 = JSON.parse(JSON.stringify(A.seed()));
+v2.v = 2;
+v2.days[0].ex = v2.days[0].ex.filter(e => e.id !== "e20" && e.id !== "e21");
+v2.days[0].ex.splice(2, 0, { id: "e3", t: "f", name: "Hip thrust", sets: 4, reps: "8" });
+v2.days[0].ex.push({ id: "exmio", t: "f", name: "Mío", sets: 3, reps: "10" });
+v2.logs = [{ id: "l9", exId: "e3", date: "2026-09-15", sets: [{ kg: 40, reps: 8 }] }];
+let w2 = boot(v2, "2026-09-21T10:00:00");
+let d1 = w2.APP.state.days[0].ex.map(e => e.id);
+ok(w2.APP.state.v === 3 && d1.indexOf("e20") === 2 && !d1.includes("e3"), "v2: hip thrust sustituido en su sitio");
+ok(d1.indexOf("e21") === d1.indexOf("e5") + 1, "v2: aducción tras abducción");
+ok(d1.includes("exmio") && w2.APP.state.logs.length === 1, "v2: ejercicio propio y registros conservados");
+
 // 6. importar copia vieja
-ok(A.importJSON(JSON.stringify(viejo)) && A.state.v === 2, "importar copia vieja la actualiza");
+ok(A.importJSON(JSON.stringify(viejo)) && A.state.v === 3, "importar copia vieja la actualiza");
 
 console.log(fails ? fails + " fallos" : "todo bien");
 process.exit(fails ? 1 : 0);
