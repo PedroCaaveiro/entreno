@@ -39,8 +39,9 @@ Sube el `index.html` nuevo y cambia en `sw.js` la línea `const CACHE = "entreno
 
 ## Versión 2 (septiembre 2026)
 
-- Plan nuevo: lunes Fuerza A, martes cardio y core, miércoles Fuerza B, viernes y sábado
-  fitboxing, jueves y domingo descanso.
+- Plan: lunes y miércoles fuerza de cuerpo completo (sentadilla, bisagra, empuje y tirón,
+  más abducción) con el cardio al final, martes remo, viernes y sábado fitboxing,
+  jueves y domingo descanso total.
 - Activación y estiramientos: ocultos por ahora. Para recuperarlos, en `index.html` cambia
   `SHOW_ACT` o `SHOW_EST` de `false` a `true`.
 - Remo: registra minutos, metros, paladas por minuto y pulsaciones. La cinta registra también pulsaciones.
