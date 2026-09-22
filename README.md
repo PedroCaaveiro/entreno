@@ -54,6 +54,13 @@ Pestaña **Comida**: menú de lunes a domingo (unas 2.000 kcal y 160 g de prote�
 con claves y lista de la compra. En el día de hoy, toca cada comida al terminarla para ver
 lo que llevas. Solo se guardan los últimos 14 días.
 
+## Progreso y datos (versión 11)
+
+La pestaña **Historial** pasa a llamarse **Progreso**: registro de pasos diarios (totales y de
+ellos corriendo), resumen de 7 y 30 días con la grasa estimada, histórico de peso y cintura, y
+debajo los entrenos guardados. En **Ajustes** se guardan edad, altura, peso y cintura, que son
+la base del cálculo. Los pasos se conservan 120 días.
+
 ## Copias de seguridad
 
 Los registros se guardan solo en el navegador de tu móvil. Usa **Ajustes → Exportar copia**

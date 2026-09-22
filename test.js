@@ -106,6 +106,26 @@ let w2 = boot(v3, "2026-09-21T10:00:00");
 ok(w2.APP.state.v === 6 && w2.APP.state.days[1].name === "Remo", "v3 se actualiza al plan nuevo");
 ok(w2.APP.findEx("exmio") && w2.APP.state.logs.length === 1, "ejercicio propio y registros conservados");
 
+// 5c. pasos, perfil y grasa estimada
+A.guardaPerfil("44", "170", "95", "108");
+ok(A.state.perfil.altura === "170" && A.state.cuerpo[0].kg === 95, "perfil y peso guardados");
+A.guardaPasos("2026-09-24", 10000, 0);
+let g = A.gastoPasos(A.state.steps["2026-09-24"]);
+ok(Math.abs(g.km - 7.055) < 0.01, "10.000 pasos andando = " + g.km.toFixed(2) + " km");
+ok(Math.abs(g.kcal - 335) < 5 && g.grasa < 0.05, "gasto andando: " + Math.round(g.kcal) + " kcal");
+A.guardaPasos("2026-09-24", 10000, 10000);
+let gr = A.gastoPasos(A.state.steps["2026-09-24"]);
+ok(gr.kcal > g.kcal * 2.4, "corriendo gasta bastante más: " + Math.round(gr.kcal) + " kcal");
+ok(A.sumaPasos(7).pasos === 10000, "resumen semanal suma los días");
+A.guardaPasos("2026-09-24", 0, 0);
+ok(!A.state.steps["2026-09-24"] && A.sumaPasos(7).pasos === 0, "poner 0 borra el día");
+ok(A.zona2() === "106-123 ppm", "zona 2 con 44 años: " + A.zona2());
+A.setView("hist");
+ok(w.document.getElementById("hdrTitle").textContent === "Progreso", "pestaña renombrada a Progreso");
+ok(w.document.getElementById("stT") && w.document.getElementById("v-hist").textContent.includes("Últimos 30 días"), "campos de pasos y resumen");
+A.setView("set");
+ok(w.document.getElementById("pfPeso").value === "95", "ajustes muestra el peso guardado");
+
 // 6. importar copia vieja
 ok(A.importJSON(JSON.stringify(viejo)) && A.state.v === 6, "importar copia vieja la actualiza");
 

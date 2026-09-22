@@ -206,7 +206,7 @@ nav button.on{color:var(--ink);border-top-color:var(--plate-hi)}
   <button data-v="hoy" class="on">Hoy</button>
   <button data-v="plan">Plan</button>
   <button data-v="food">Comida</button>
-  <button data-v="hist">Historial</button>
+  <button data-v="hist">Progreso</button>
   <button data-v="set">Ajustes</button>
 </nav>
 
@@ -269,7 +269,10 @@ function seed(){
         {id:"e28", t:"c", cm:"clase", name:"Clase de fitboxing", sets:1, reps:"1 clase", note:"Registro aparte del viernes, para comparar los dos días.", ref:"", find:""}
        ]}    ],
     logs:[],
-    eaten:{}
+    eaten:{},
+    steps:{},
+    perfil:{edad:"", altura:"", peso:"", cintura:""},
+    cuerpo:[]
   };
 }
 
@@ -329,6 +332,9 @@ function migrate(s){
   if(!Array.isArray(s.days)) return null;
   if(!Array.isArray(s.logs)) s.logs = [];
   if(!s.eaten || typeof s.eaten !== "object" || Array.isArray(s.eaten)) s.eaten = {};
+  if(!s.steps || typeof s.steps !== "object" || Array.isArray(s.steps)) s.steps = {};
+  if(!s.perfil || typeof s.perfil !== "object") s.perfil = {edad:"", altura:"", peso:"", cintura:""};
+  if(!Array.isArray(s.cuerpo)) s.cuerpo = [];
   s.days.forEach(function(d){
     if(!Array.isArray(d.ex)) d.ex = [];
     if(!Array.isArray(d.wd)) d.wd = [];
@@ -531,6 +537,73 @@ function renderFood(){
   document.getElementById("v-food").innerHTML = html;
 }
 
+
+/* ---------------- pasos y grasa estimada ---------------- */
+var KCAL_KG_GRASA = 7700;
+function perfilNum(k, porDefecto){
+  var v = parseFloat(state.perfil[k]);
+  return isNaN(v) || v <= 0 ? porDefecto : v;
+}
+/* zancada en metros a partir de la altura */
+function zancada(corriendo){
+  var h = perfilNum("altura", 170);
+  return (corriendo ? 0.58 : 0.415) * h / 100;
+}
+/* gasto de un día de pasos: andando ~0,5 kcal por kilo y km; corriendo ~0,95 */
+function gastoPasos(d){
+  var peso = perfilNum("peso", 80);
+  var tot = Math.max(parseInt(d && d.t, 10) || 0, 0);
+  var cor = Math.min(Math.max(parseInt(d && d.r, 10) || 0, 0), tot);
+  var and = tot - cor;
+  var kmA = and * zancada(false) / 1000, kmC = cor * zancada(true) / 1000;
+  var kcal = kmA * 0.5 * peso + kmC * 0.95 * peso;
+  return {pasos:tot, corriendo:cor, km:kmA + kmC, kcal:kcal, grasa:kcal / KCAL_KG_GRASA};
+}
+function diasPasos(n){
+  var out = [], d = today();
+  for(var i = 0; i < n; i++){
+    var k = ymd(new Date(d.getTime() - i*864e5));
+    out.push({date:k, d:state.steps[k] || null});
+  }
+  return out;
+}
+function sumaPasos(n){
+  return diasPasos(n).reduce(function(t, x){
+    var g = gastoPasos(x.d);
+    t.pasos += g.pasos; t.km += g.km; t.kcal += g.kcal; t.grasa += g.grasa;
+    return t;
+  }, {pasos:0, km:0, kcal:0, grasa:0});
+}
+function guardaPasos(fecha, total, corriendo){
+  var t = parseInt(total, 10);
+  if(isNaN(t) || t <= 0){ delete state.steps[fecha]; }
+  else{
+    var r = parseInt(corriendo, 10);
+    state.steps[fecha] = {t:t, r:isNaN(r) || r < 0 ? 0 : Math.min(r, t)};
+  }
+  // se guardan 120 días
+  var lim = ymd(new Date(today().getTime() - 120*864e5));
+  Object.keys(state.steps).forEach(function(k){ if(k < lim) delete state.steps[k]; });
+  save();
+}
+function guardaPerfil(edad, altura, peso, cintura){
+  state.perfil = {edad:edad, altura:altura, peso:peso, cintura:cintura};
+  var kg = parseFloat(peso), cm = parseFloat(cintura), f = ymd(today());
+  if(!isNaN(kg) || !isNaN(cm)){
+    state.cuerpo = state.cuerpo.filter(function(x){ return x.date !== f; });
+    state.cuerpo.push({date:f, kg:isNaN(kg) ? "" : kg, cm:isNaN(cm) ? "" : cm});
+    state.cuerpo.sort(function(a,b){ return a.date < b.date ? 1 : -1; });
+    state.cuerpo = state.cuerpo.slice(0, 60);
+  }
+  save();
+}
+function zona2(){
+  var edad = perfilNum("edad", 44), max = 220 - edad;
+  return Math.round(max*0.6) + "-" + Math.round(max*0.7) + " ppm";
+}
+function num1(n){ return (Math.round(n*10)/10).toString().replace(".", ","); }
+function num2(n){ return (Math.round(n*100)/100).toString().replace(".", ","); }
+
 /* ---------------- render ---------------- */
 function render(){
   ["hoy","plan","food","hist","set"].forEach(function(v){
@@ -612,16 +685,46 @@ function renderPlan(){
 }
 
 function renderHist(){
-  head("Historial", "Registros", state.logs.length + " sesiones guardadas");
+  head("Progreso", "Pasos y registros", state.logs.length + " sesiones guardadas");
   var el = document.getElementById("v-hist");
+  var hoyK = ymd(today()), hoyD = state.steps[hoyK] || {t:"", r:""};
+  var sem = sumaPasos(7), mes = sumaPasos(30);
+  var html = '<h2 class="sec">Pasos de hoy</h2>'
+    + '<div class="card" style="padding:12px 14px">'
+    + '<div class="grid2">'
+    + '<div class="field"><span>Pasos del día</span><input id="stT" type="number" inputmode="numeric" min="0" step="100" value="'+esc(hoyD.t)+'"></div>'
+    + '<div class="field"><span>De ellos, corriendo</span><input id="stR" type="number" inputmode="numeric" min="0" step="100" value="'+esc(hoyD.r)+'"></div>'
+    + '</div>'
+    + '<button class="btn row" data-act="savesteps">Guardar pasos</button></div>'
+    + '<div class="dayNote num"><b>Últimos 7 días:</b> ' + miles(sem.pasos) + ' pasos · ' + num1(sem.km) + ' km · '
+    + miles(Math.round(sem.kcal)) + ' kcal · <b>' + num2(sem.grasa) + ' kg de grasa</b><br>'
+    + '<b>Últimos 30 días:</b> ' + miles(mes.pasos) + ' pasos · ' + num2(mes.grasa) + ' kg de grasa</div>';
+  var filas = diasPasos(7).filter(function(x){ return x.d; });
+  if(filas.length){
+    html += '<div class="card" style="padding:4px 12px 8px">' + filas.map(function(x){
+      var g = gastoPasos(x.d);
+      return '<div class="hist"><div class="d num">'+esc(fmtDate(x.date))+'</div>'
+        + '<div class="v num">' + miles(g.pasos) + ' pasos' + (g.corriendo ? ' (' + miles(g.corriendo) + ' corriendo)' : '')
+        + '<div style="color:var(--plate-hi);font-size:14px">' + num1(g.km) + ' km · ' + Math.round(g.kcal) + ' kcal · ' + num2(g.grasa) + ' kg</div></div></div>';
+    }).join("") + '</div>';
+  }
+  html += '<div class="empty">Estimación a partir de tu peso y tu altura, con la zancada andando y corriendo. No incluye pesas ni remo, así que el gasto real es mayor. La cintura sigue siendo la medida que manda.</div>';
+  if(state.cuerpo.length){
+    html += '<h2 class="sec">Peso y cintura</h2><div class="card" style="padding:4px 12px 8px">'
+      + state.cuerpo.slice(0, 8).map(function(x){
+          return '<div class="hist"><div class="d num">'+esc(fmtDate(x.date))+'</div><div class="v num">'
+            + (x.kg !== "" ? x.kg + ' kg' : '') + (x.kg !== "" && x.cm !== "" ? ' · ' : '') + (x.cm !== "" ? x.cm + ' cm de cintura' : '') + '</div></div>';
+        }).join("") + '</div>';
+  }
+  html += '<h2 class="sec">Entrenos</h2>';
   if(!state.logs.length){
-    el.innerHTML = '<div class="empty">Aún no has registrado nada. Empieza en Hoy: toca un ejercicio y guarda las series.</div>';
+    el.innerHTML = html + '<div class="empty">Aún no has registrado ningún entreno. Empieza en Hoy: toca un ejercicio y guarda las series.</div>';
     return;
   }
   var byDate = {};
   state.logs.forEach(function(l){ (byDate[l.date] = byDate[l.date] || []).push(l); });
   var dates = Object.keys(byDate).sort().reverse();
-  el.innerHTML = dates.map(function(dt){
+  el.innerHTML = html + dates.map(function(dt){
     return '<h2 class="sec num">'+esc(dt)+'</h2><div class="card" style="padding:4px 12px 8px">'
       + byDate[dt].map(function(l){
           var f = findEx(l.exId);
@@ -634,12 +737,22 @@ function renderHist(){
 }
 
 function renderSet(){
-  head("Ajustes", "Copia y datos", "Los datos se guardan solo en este móvil");
+  head("Ajustes", "Tus datos y copias", "Todo se guarda solo en este móvil");
   var n = 0;
   state.days.forEach(function(d){ n += d.ex.length; });
+  var pf = state.perfil;
   document.getElementById("v-set").innerHTML =
-     '<div class="dayNote"><b>'+n+' ejercicios</b> y <b>'+state.logs.length+' sesiones</b> guardadas. '
-   + 'Nada sale de este teléfono: si borras los datos del navegador o cambias de movil, se pierde. Exporta de vez en cuando.</div>'
+     '<h2 class="sec">Tus datos</h2>'
+   + '<div class="card" style="padding:12px 14px"><div class="grid2">'
+   + '<div class="field"><span>Edad</span><input id="pfEdad" type="number" inputmode="numeric" min="0" value="'+esc(pf.edad)+'"></div>'
+   + '<div class="field"><span>Altura (cm)</span><input id="pfAlt" type="number" inputmode="numeric" min="0" value="'+esc(pf.altura)+'"></div>'
+   + '<div class="field"><span>Peso (kg)</span><input id="pfPeso" type="number" inputmode="decimal" step="0.1" min="0" value="'+esc(pf.peso)+'"></div>'
+   + '<div class="field"><span>Cintura (cm)</span><input id="pfCin" type="number" inputmode="decimal" step="0.5" min="0" value="'+esc(pf.cintura)+'"></div>'
+   + '</div><button class="btn row" data-act="saveperfil">Guardar datos</button></div>'
+   + '<div class="empty">Con el peso y la altura se calcula la grasa estimada en Progreso. Tu zona 2 de cardio: '+zona2()+'. Apunta peso y cintura una vez por semana, en ayunas.</div>'
+   + '<h2 class="sec">Copias</h2>'
+   + '<div class="dayNote"><b>'+n+' ejercicios</b> y <b>'+state.logs.length+' sesiones</b> guardadas. '
+   + 'Nada sale de este teléfono: si borras los datos del navegador o cambias de móvil, se pierde. Exporta de vez en cuando.</div>'
    + '<button class="btn row" data-act="export">Exportar copia de seguridad</button>'
    + '<label class="btn ghost row" style="text-align:center;cursor:pointer">Importar copia<input type="file" accept=".json,application/json" id="impFile" style="display:none"></label>'
    + '<button class="btn warn row" data-act="reset">Restaurar el plan original</button>'
@@ -889,6 +1002,15 @@ document.addEventListener("click", function(ev){
     else addExercise(t.dataset.day, data);
     closeSheet(); render(); return;
   }
+  if(act === "savesteps"){
+    guardaPasos(ymd(today()), document.getElementById("stT").value, document.getElementById("stR").value);
+    render(); return;
+  }
+  if(act === "saveperfil"){
+    guardaPerfil(document.getElementById("pfEdad").value, document.getElementById("pfAlt").value,
+                 document.getElementById("pfPeso").value, document.getElementById("pfCin").value);
+    render(); return;
+  }
   if(act === "export"){ download(); return; }
   if(act === "reset"){
     if(confirm("Esto borra tus ejercicios y registros y vuelve al plan original. Continuar?")){
@@ -942,6 +1064,7 @@ window.APP = {
   REF:REF,
   get state(){ return state; },
   set state(s){ state = s; },
+  gastoPasos:gastoPasos, sumaPasos:sumaPasos, guardaPasos:guardaPasos, guardaPerfil:guardaPerfil, zona2:zona2,
   MEALS:MEALS, FOOD_WEEK:FOOD_WEEK, foodTotals:foodTotals, toggleMeal:toggleMeal,
   seed:seed, save:save, load:load, migrate:migrate, MOV:MOV, CFIELDS:CFIELDS, upgradePlan:upgradePlan,
   addExercise:addExercise, updateExercise:updateExercise, removeExercise:removeExercise,
