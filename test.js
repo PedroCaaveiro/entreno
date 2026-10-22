@@ -20,10 +20,10 @@ function boot(stored, date) {
 // 1. plan nuevo
 let w = boot(null, "2026-09-21T10:00:00");            // lunes
 let A = w.APP;
-ok(A.state.v === 7, "plan v7 por defecto");
-ok(A.state.days[0].ex.map(e => e.id).join() === "e1,e20,e4,e10,e5,e25,e26,e15", "lunes: 4 patrones, abducción, cuádriceps, femoral y remo");
+ok(A.state.v === 8, "plan v8 por defecto");
+ok(A.state.days[0].ex.map(e => e.id).join() === "e1,e20,e30,e10,e5,e25,e26,e15", "lunes: remo con mancuerna en vez de press militar");
 
-ok(A.state.days[2].ex.map(e => e.id).join() === "e23,e24,e2,e8,e12,e21,e14", "miércoles: cuerpo completo + cinta");
+ok(A.state.days[2].ex.map(e => e.id).join() === "e23,e24,e31,e8,e12,e21,e14", "miércoles: cuerpo completo + cinta");
 ok(!A.findEx("e3") && !A.findEx("e7"), "fuera hip thrust y antigua cinta del martes");
 ok(A.state.days.map(d => d.wd.join()).join("|") === "1|2|3|5|6", "días: lun, mar, mié, vie, sáb");
 ok(A.state.days.map(d => d.name).join() === "Fuerza A,Remo,Fuerza B,Fitboxing,Cinta", "nombres de las sesiones");
@@ -58,6 +58,9 @@ ok(!w.document.querySelector("[data-mov]"), "sin tarjetas de activación");
 let e = A.addExercise("d4", { name: "Remo extra", t: "c:remo", sets: 1, reps: "10 min" });
 ok(e.t === "c" && e.cm === "remo", "nuevo ejercicio de remo");
 
+ok(!A.findEx("e4") && !A.findEx("e2"), "fuera press militar y press de pecho");
+ok(A.state.days.every(d => d.ex.every(e => e.cm !== "cinta" || /6 %/.test(e.note))), "todas las cintas al 6 %");
+
 // 4b. alimentación
 A.FOOD_WEEK.forEach((d, i) => {
   const miss = d.m.filter(id => !A.MEALS[id]);
@@ -85,7 +88,7 @@ const viejo = { v: 1, days: [
          { id: "l2", exId: "e7", date: "2026-09-03", cardio: { min: 35, inc: 12, kmh: 5.5 } }] };
 w = boot(viejo, "2026-09-24T10:00:00");               // jueves
 A = w.APP;
-ok(A.state.v === 7 && A.state.days.length === 5, "plan viejo actualizado");
+ok(A.state.v === 8 && A.state.days.length === 5, "plan viejo actualizado");
 ok(A.state.logs.length === 2, "registros conservados");
 ok(A.state.eaten && typeof A.state.eaten === "object", "estado viejo recibe registro de comidas");
 ok(A.logsOf("e1")[0].sets[0].kg === 80, "historial de prensa intacto");
@@ -100,11 +103,11 @@ ok(!pl.includes("Estiramientos") && !pl.includes("Activación"), "plan sin estir
 
 // 5b. usuario de una versión anterior
 const v3 = JSON.parse(JSON.stringify(A.seed()));
-v3.v = 6;
+v3.v = 7;
 v3.days[0].ex.push({ id: "exmio", t: "f", name: "Mío", sets: 3, reps: "10" });
 v3.logs = [{ id: "l9", exId: "e1", date: "2026-09-15", sets: [{ kg: 90, reps: 8 }] }];
 let w2 = boot(v3, "2026-09-21T10:00:00");
-ok(w2.APP.state.v === 7 && w2.APP.state.days[1].name === "Remo", "v3 se actualiza al plan nuevo");
+ok(w2.APP.state.v === 8 && w2.APP.state.days[1].name === "Remo", "v3 se actualiza al plan nuevo");
 ok(w2.APP.findEx("exmio") && w2.APP.state.logs.length === 1, "ejercicio propio y registros conservados");
 
 // 5c. pasos, perfil y grasa estimada
@@ -128,7 +131,7 @@ A.setView("set");
 ok(w.document.getElementById("pfPeso").value === "95", "ajustes muestra el peso guardado");
 
 // 6. importar copia vieja
-ok(A.importJSON(JSON.stringify(viejo)) && A.state.v === 7, "importar copia vieja la actualiza");
+ok(A.importJSON(JSON.stringify(viejo)) && A.state.v === 8, "importar copia vieja la actualiza");
 
 console.log(fails ? fails + " fallos" : "todo bien");
 process.exit(fails ? 1 : 0);

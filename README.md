@@ -61,6 +61,12 @@ ellos corriendo), resumen de 7 y 30 días con la grasa estimada, histórico de p
 debajo los entrenos guardados. En **Ajustes** se guardan edad, altura, peso y cintura, que son
 la base del cálculo. Los pasos se conservan 120 días.
 
+## Hombro (versión 13)
+
+Tendinopatía del manguito rotador, octubre de 2026: fuera el press militar y el press de pecho
+mientras dure el tratamiento; en su lugar, remo con mancuerna (lunes) y remo bajo en polea
+(miércoles). Las cintas pasan a 6 % de pendiente y más tiempo, por indicación del fisio.
+
 ## Copias de seguridad
 
 Los registros se guardan solo en el navegador de tu móvil. Usa **Ajustes → Exportar copia**
