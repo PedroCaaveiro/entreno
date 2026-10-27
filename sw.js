@@ -1,5 +1,5 @@
 // Service worker: guarda la app para que funcione sin internet.
-const CACHE = "entreno-v13";
+const CACHE = "entreno-v15";
 const FILES = [
   "./",
   "./index.html",

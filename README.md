@@ -67,6 +67,30 @@ Tendinopatía del manguito rotador, octubre de 2026: fuera el press militar y el
 mientras dure el tratamiento; en su lugar, remo con mancuerna (lunes) y remo bajo en polea
 (miércoles). Las cintas pasan a 6 % de pendiente y más tiempo, por indicación del fisio.
 
+## Alimentación revisada (versión 14)
+
+Calorías y proteína recalculadas con valores reales: el menú sale sobre 1.750-1.850 kcal
+y 150-165 g de proteína, no las cifras redondeadas al alza anteriores. Objetivo: 1.800 kcal
+y 155 g. Horarios ajustados: comida a las 14:00 (antes de entrenar) y merienda a las 16:00.
+
+## Versión 15 (octubre 2026)
+
+Plan v10, con la fuerza en el fin de semana:
+
+- Lunes cardio + carrera · martes descanso · miércoles intervalos + carrera · jueves descanso ·
+  viernes fitboxing · sábado Fuerza A (tirón y cadera) · domingo Fuerza B (pierna pesada y tirón).
+- Carrera progresiva en cinta al 1 %, de 12 a 30 minutos seguidos en 8 semanas, con descarga
+  la 4.ª semana.
+- Nuevos campos de registro: distancia y pulsaciones en cinta, modalidad "carrera" completa y
+  pulsación máxima en remo. Los km y la velocidad se calculan solos si falta uno de los dos, y
+  el desnivel positivo se muestra en el historial.
+- Progreso añade km andados, km corridos, desnivel acumulado, carrera continua más larga y
+  mejor velocidad (7 y 30 días).
+- Ajustes guarda FC en reposo y FC máxima medida: con las dos, las zonas se calculan por
+  Karvonen; sin ellas, por edad. Las notas de los ejercicios muestran la zona calculada.
+- Restricciones activas: sin press por el hombro; sin zancadas, cajón ni trabajo a una pierna
+  por la bursitis de cadera.
+
 ## Copias de seguridad
 
 Los registros se guardan solo en el navegador de tu móvil. Usa **Ajustes → Exportar copia**
