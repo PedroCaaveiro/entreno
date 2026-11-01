@@ -73,6 +73,18 @@ Calorías y proteína recalculadas con valores reales: el menú sale sobre 1.750
 y 150-165 g de proteína, no las cifras redondeadas al alza anteriores. Objetivo: 1.800 kcal
 y 155 g. Horarios ajustados: comida a las 14:00 (antes de entrenar) y merienda a las 16:00.
 
+## Versión 17 (octubre 2026)
+
+Todos los ejercicios de la pauta del fisio llevan ya dibujo además del vídeo, y los dos días
+de fuerza terminan con cardio: remo de 20 min el sábado y cinta de 25-30 min el domingo,
+siempre después de la fuerza.
+
+## Versión 16 (octubre 2026)
+
+Los dos días de fuerza pasan a ser la planificación del fisio: sábado empujes de miembro
+superior y cadena posterior, domingo tracciones y cadena anterior. Cada ejercicio lleva el
+enlace al vídeo que dio el fisio y respeta sus cargas (floor press con 5 kg, remo en T al 50 %).
+
 ## Versión 15 (octubre 2026)
 
 Plan v10, con la fuerza en el fin de semana:
